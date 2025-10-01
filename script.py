@@ -1,6 +1,7 @@
 # Backend Integration Test
 
 import sys
+from datetime import datetime
 
 #defining extract data function
 
@@ -12,9 +13,11 @@ def parse_log_data(string):
     client_ip = line[6].split("#")[0]
     host = line[7].strip("():")
 
+    time_stamp = f"{date}T{time}Z"
+    parsed_time_stamp = datetime.strptime(time_stamp, '%d-%b-%YT%H:%M:%S.%fZ')
+
     return {
-        "date": date,
-        "time": time,
+        "timestamp": parsed_time_stamp.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z',
         "client_ip": client_ip,
         "host": host
     }
