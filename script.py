@@ -2,8 +2,10 @@
 
 import sys
 from datetime import datetime
+import requests
+import os
 
-top_n = 10
+top_n = 5
 total_logs_counter = 0
 total_ips = {}
 total_host = {}
@@ -78,6 +80,22 @@ def show_info(rank_data):
     
     print(f"{'-'*max_data_len}  {'-'*max_datacount_len}  {'-'*6}\n")
 
+#Send Http request to the API
+
+def send_Request(request_data):
+    url = "https://api.lumu.io"
+    collector_id = os.getenv("COLLECTOR_ID")
+    lumu_client_key = os.getenv("LUMU_CLIENT_KEY")
+
+    response = requests.post(
+        f"{url}/collectors/{collector_id}/dns/queries?key={lumu_client_key}",
+        json=request_data,
+        headers={"Content-Type": "application/json"})
+
+    if response.status_code == 200:
+        print("Request sent successfully")
+    else:
+        print("Error sending request")
 
 #Read file and use data.
 
@@ -96,19 +114,19 @@ def read_logs(rute):
                 count_ips(request_body)
                 count_hosts(request_body)
                 
-                #SendToApi
+                send_Request(request_body)
 
                 request_body = []
 
     if request_body:
         count_ips(request_body)
         count_hosts(request_body)
-        #SendToApi
+        send_Request(request_body)
     
     rank_ips = ranking(total_ips, top_n)
     rank_host = ranking(total_host, top_n)
 
-    print(f"Total records {total_logs_counter}\n")
+    print(f"\nTotal records {total_logs_counter}\n")
     print("Client IPs Rank")
     show_info(rank_ips)
     print("Client Host Rank")
