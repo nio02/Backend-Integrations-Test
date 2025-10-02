@@ -30,25 +30,19 @@ def parse_log_data(string):
     }
 
 
-#Function to count how many times appear an id and host
+#Function to count how many times appear a given data
 
-def count_ips(data):
-    ip_list = [d["client_ip"] for d in data]
-
-    for ip in ip_list:
-        if ip in total_ips:
-            total_ips[ip] += 1
+def count_data(data, key):
+    if key == "client_ip":
+        if data in total_ips:
+            total_ips[data] += 1
         else:
-            total_ips[ip] = 1
-
-def count_hosts(data):
-    host_list = [d["host"] for d in data]
-
-    for host in host_list:
-        if host in total_host:
-            total_host[host] += 1
+            total_ips[data] = 1
+    if key == "host":
+        if data in total_host:
+            total_host[data] += 1
         else:
-            total_host[host] = 1
+            total_host[data] = 1
 
 
 #Ranking Function
@@ -97,6 +91,7 @@ def send_Request(request_data):
     else:
         print("Error sending request")
 
+
 #Read file and use data.
 
 def read_logs(rute):
@@ -108,19 +103,18 @@ def read_logs(rute):
     with open(rute, "r") as f:
         for line in f:
             total_logs_counter += 1
-            data = parse_log_data(line)
-            request_body.append(data)
-            if len(request_body) >= chunk:
-                count_ips(request_body)
-                count_hosts(request_body)
-                
-                send_Request(request_body)
 
+            data = parse_log_data(line)
+            count_data(data["client_ip"], "client_ip")
+            count_data(data["host"], "host")
+
+            request_body.append(data)
+
+            if len(request_body) >= chunk:
+                send_Request(request_body)
                 request_body = []
 
     if request_body:
-        count_ips(request_body)
-        count_hosts(request_body)
         send_Request(request_body)
     
     rank_ips = ranking(total_ips, top_n)
