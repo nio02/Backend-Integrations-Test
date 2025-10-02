@@ -5,6 +5,7 @@ from datetime import datetime
 import requests
 import os
 import time
+import heapq
 
 top_n = 5
 total_logs_counter = 0
@@ -70,13 +71,13 @@ def quick_sort(items):
 def ranking(total_dic, n_elements):
     start = time.time()
     total_items = list(total_dic.items())
-    sorted_items = quick_sort(total_items)
+    sorted_items = heapq.nlargest(n_elements, total_items, key=lambda x: x[1])
 
     end = time.time()
     running_time = end - start
     print(f"Execution time: {running_time} seconds")
 
-    return sorted_items[:n_elements]
+    return sorted_items
 
 
 #Show info in console
