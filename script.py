@@ -4,6 +4,7 @@ import sys
 from datetime import datetime
 import requests
 import os
+import time
 
 top_n = 5
 total_logs_counter = 0
@@ -47,15 +48,21 @@ def count_data(data, key):
 
 #Ranking Function
 
-def ranking(total_data, n_elements):
-    rank_data = []
+def ranking(total_dic, n_elements):
+    start = time.time()
+    total_items = list(total_dic.items())
+    n = len(total_items)
 
-    for data, count in total_data.items():
-        rank_data.append((data, count))
+    for i in range (n):
+        for j in range(0, n - i - 1):
+            if total_items[j][1] < total_items[j + 1][1]:
+                total_items[j], total_items[j + 1] = total_items[j + 1], total_items[j]
 
-    rank_data.sort(key=lambda x: x[1], reverse = True)
+    end = time.time()
+    running_time = end - start
+    print(f"Execution time: {running_time} seconds")
 
-    return rank_data[:n_elements]
+    return total_items[:n_elements]
 
 
 #Show info in console
@@ -73,6 +80,7 @@ def show_info(rank_data):
         print(row_format.format(data, count, percentage))
     
     print(f"{'-'*max_data_len}  {'-'*max_datacount_len}  {'-'*6}\n")
+
 
 #Send Http request to the API
 
