@@ -3,7 +3,7 @@
 import sys
 from datetime import datetime
 
-top_n = 5
+top_n = 10
 total_logs_counter = 0
 total_ips = {}
 total_host = {}
@@ -28,7 +28,7 @@ def parse_log_data(string):
     }
 
 
-#Function to count how many times appear an id
+#Function to count how many times appear an id and host
 
 def count_ips(data):
     ip_list = [d["client_ip"] for d in data]
@@ -47,6 +47,37 @@ def count_hosts(data):
             total_host[host] += 1
         else:
             total_host[host] = 1
+
+
+#Ranking Function
+
+def ranking(total_data, n_elements):
+    rank_data = []
+
+    for data, count in total_data.items():
+        rank_data.append((data, count))
+
+    rank_data.sort(key=lambda x: x[1], reverse = True)
+
+    return rank_data[:n_elements]
+
+
+#Show info in console
+
+def show_info(rank_data):
+    max_data_len = max(len(data) for data, _ in rank_data)
+    max_datacount_len = max(len(str(count)) for _, count in rank_data)
+
+    print(f"{'-'*max_data_len}  {'-'*max_datacount_len}  {'-'*6}")
+
+    row_format = f"{{:<{max_data_len}}}  {{:>{max_datacount_len}}}  {{:>5.2f}}%"
+
+    for data, count in rank_data:
+        percentage = (count / total_logs_counter) * 100
+        print(row_format.format(data, count, percentage))
+    
+    print(f"{'-'*max_data_len}  {'-'*max_datacount_len}  {'-'*6}\n")
+
 
 #Read file and use data.
 
@@ -68,10 +99,20 @@ def read_logs(rute):
                 #SendToApi
 
                 request_body = []
-    
-    print(total_logs_counter)
 
+    if request_body:
+        count_ips(request_body)
+        count_hosts(request_body)
+        #SendToApi
+    
+    rank_ips = ranking(total_ips, top_n)
+    rank_host = ranking(total_host, top_n)
+
+    print(f"Total records {total_logs_counter}\n")
+    print("Client IPs Rank")
+    show_info(rank_ips)
+    print("Client Host Rank")
+    show_info(rank_host)
 
 file = sys.argv[1]
 read_logs(file)
-
