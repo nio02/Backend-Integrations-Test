@@ -48,21 +48,35 @@ def count_data(data, key):
 
 #Ranking Function
 
+def quick_sort(items):
+    if len(items) <= 1:
+        return items
+    
+    pivot = items[0]
+    left = []
+    right = []
+    middle = []
+
+    for i in items:
+        if i[1] > pivot[1]:
+            left.append(i)
+        elif i[1] < pivot[1]:
+            right.append(i)
+        else:
+            middle.append(i)
+    
+    return quick_sort(left) + middle + quick_sort(right)
+
 def ranking(total_dic, n_elements):
     start = time.time()
     total_items = list(total_dic.items())
-    n = len(total_items)
-
-    for i in range (n):
-        for j in range(0, n - i - 1):
-            if total_items[j][1] < total_items[j + 1][1]:
-                total_items[j], total_items[j + 1] = total_items[j + 1], total_items[j]
+    sorted_items = quick_sort(total_items)
 
     end = time.time()
     running_time = end - start
     print(f"Execution time: {running_time} seconds")
 
-    return total_items[:n_elements]
+    return sorted_items[:n_elements]
 
 
 #Show info in console
